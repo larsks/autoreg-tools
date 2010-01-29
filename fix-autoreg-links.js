@@ -41,11 +41,8 @@ function replace_mac_addrs () {
 
 		text = cand.firstChild.textContent;
 		var match = cand.firstChild.textContent.match(macaddrRegex);
-		if (! match) {
-			if (text.indexOf('00:') == 0)
-				alert("Failed to match: " + text);
+		if (! match)
 			continue;
-		}
 
 		var a = document.createElement("a");
 		a.setAttribute('href', CLIENT_URL + match[0]);
