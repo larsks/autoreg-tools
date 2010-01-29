@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           fix-autoreg-client-links
-// @namespace      http://seas.harvard.edu/ns/greasemonkey/
+// @namespace      http://seas.harvard.edu/lars/
 // @include        https://autoreg.fas.harvard.edu/tools/*
 // ==/UserScript==
 
