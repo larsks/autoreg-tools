@@ -11,6 +11,8 @@ import lxml.etree as ET
 
 import configdict
 
+csv_fields = [ 'hostname', 'ipaddr', 'macaddr', 'owner' ]
+
 class AutoregError (Exception):
     def __init__ (self, msg=None, request=None, response=None):
         super(AutoregError, self).__init__(msg)
@@ -92,6 +94,9 @@ class Autoreg (object):
                     cells_text.append(cell.find('a').text.strip())
                 else:
                     cells_text.append(cell.text.strip())
+
+            # remove first element, which is an <input> field.
+            cells_text.pop(0)
             data.append(dict(zip(csv_fields, cells_text)))
 
         return data
