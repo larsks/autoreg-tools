@@ -1,12 +1,5 @@
 #!/usr/bin/python
 
-# The plan:
-# - Read credentials from a configuration file
-# - Authenticate to autoreg
-# - Request
-#   https://autoreg.fas.harvard.edu/tools/scopes.html?scope=<scope>
-# - Parse result into structured form
-
 import os
 import sys
 import csv
@@ -17,8 +10,6 @@ import urllib2
 import lxml.etree as ET
 
 import configdict
-
-csv_fields = [ 'junk', 'hostname', 'ipaddr', 'macaddr', 'owner' ]
 
 class AutoregError (Exception):
     def __init__ (self, msg=None, request=None, response=None):
