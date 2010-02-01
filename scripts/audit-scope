@@ -1,0 +1,110 @@
+#!/usr/bin/python
+
+'''Audit registrations in an autoreg scope.  Report on hosts that are
+registered in autoreg but don't respond to ping and to hosts that 
+respond to ping but are not in autoreg.'''
+
+import os
+import sys
+import optparse
+import subprocess
+import logging
+import csv
+
+import iptools
+import autoreg
+import configdict
+
+def parse_args():
+    p = optparse.OptionParser()
+    p.add_option('-f', '--config', default='autoreg.conf')
+    p.add_option('-o', '--output')
+    p.add_option('-v', '--verbose', action='store_true')
+    p.add_option('-t', '--timeout', default='3')
+    p.add_option('--ping', default='/bin/ping')
+    return p.parse_args()
+
+def check_host_up(ip, opts):
+    devnull = open('/dev/null', 'w')
+    res = subprocess.call([opts.ping, '-W', opts.timeout, '-c', '1', '-n', '-q', '%s' % ip],
+            stdout=devnull,
+            stderr=devnull)
+    return res == 0
+
+def main():
+    opts, args = parse_args()
+    net = args.pop(0)
+
+    if opts.verbose:
+        level = logging.INFO
+    else:
+        level = logging.WARN
+
+    if opts.output:
+        sys.stdout = open(opts.output, 'w')
+
+    logging.basicConfig(level=level)
+    log = logging.getLogger('audit-scope')
+
+    try:
+        net,mask = net.split('/')
+    except ValueError:
+        mask = '24'
+
+    log.info('Got network = %s, mask = %s' % (net, mask))
+    net_block = iptools.IpRange('%s/%s' % (net,mask))
+
+    config = configdict.ConfigDict(opts.config)
+    ar = autoreg.Autoreg(config)
+
+    ar.login()
+    scope = ar.scope(net)
+    log.info('Got scope with %d registrations.' % len(scope))
+    scope_by_addr = dict([(x['ipaddr'], x) for x in scope])
+
+    for ipaddr in net_block:
+        if ipaddr in [iptools.long2ip(net_block.startIp),
+                iptools.long2ip(net_block.endIp)]:
+            continue
+
+        entry = scope_by_addr.get(ipaddr)
+        log.info('Checking: %s' % ipaddr)
+        up = check_host_up(ipaddr, opts)
+
+        if ipaddr in scope_by_addr and not up:
+            log.warn('MISSING: registered but not up: %s' % ipaddr)
+            state = 'down/missing'
+        elif ipaddr not in scope_by_addr and up:
+            log.warn('INVALID: up but not not registered: %s' % ipaddr)
+            state = 'up/invalid'
+        else:
+            state = 'up' if up else 'down'
+
+        if entry:
+            entry['state'] = state
+        else:
+            entry = scope_by_addr[ipaddr] = {
+                    'ipaddr': ipaddr,
+                    'state': state,
+                    }
+            scope.append(entry)
+
+    writer = csv.DictWriter(sys.stdout, 
+            ['hostname', 'ipaddr', 'macaddr', 'owner', 'state'])
+    writer.writerows(scope)
+
+if __name__ == '__main__':
+    main()
+
+# queryToolMacAddress=00%3A0c%3A29%3Ade%3Adc%3Ae3
+# queryToolName=
+# queryToolHostName=
+# queryToolPhone=
+# queryToolIpAddress=
+# queryToolEmail=
+# queryToolResourceGroupId=1000000004514
+# queryToolDescription=
+# queryToolUsername=
+# check_1000000024527=on
+# action=unregisterClients
+ 
