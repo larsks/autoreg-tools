@@ -22,6 +22,24 @@ So:
 Using the audit script
 ======================
 
+Configuration
+-------------
+
+You need to provide your Autoreg credentials to the audit script.  By
+default it will try to open ``autoreg.conf`` in your current directory; you
+can specify an alternate location with the ``-f`` command line option.
+
+The file is an INI-style configuration file and should look something like
+this::
+
+  [autoreg]
+
+  username = your_username
+  password = your_password
+
+Running
+-------
+
 To produce an audit of a network::
 
   audit-scope -o audit.csv 140.247.x.y
