@@ -96,15 +96,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-# queryToolMacAddress=00%3A0c%3A29%3Ade%3Adc%3Ae3
-# queryToolName=
-# queryToolHostName=
-# queryToolPhone=
-# queryToolIpAddress=
-# queryToolEmail=
-# queryToolResourceGroupId=1000000004514
-# queryToolDescription=
-# queryToolUsername=
-# check_1000000024527=on
-# action=unregisterClients
- 
