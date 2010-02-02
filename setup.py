@@ -7,6 +7,7 @@ def read(fname):
 setup(name='autoreg-tools',
         version='20100201.1',
         install_requires=[
+            'lxml',
             'configdict',
             ],
         description='Tools for interacting with FAS Autoreg network registration system.',
