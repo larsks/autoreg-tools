@@ -49,7 +49,7 @@ class Autoreg (object):
         req = urllib2.Request(self.login_url, data)
         response = self.opener.open(req)
 
-        if response.getcode() != 200:
+        if response.code != 200:
             raise HTTPError('%s: %s' % (r.getcode(), r.msg),
                     request=req,
                     response=response)
