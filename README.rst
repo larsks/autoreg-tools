@@ -44,7 +44,7 @@ To produce an audit of a network::
 
   audit-scope -o audit.csv 140.247.x.y
 
-You can turn on slightly more verbose logging with ``-v``:
+You can turn on slightly more verbose logging with ``-v``::
 
   audit-scope -v -o audit.csv 140.247.x.y
 
