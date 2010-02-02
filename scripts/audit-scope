@@ -78,7 +78,7 @@ def main():
             log.warn('INVALID: up but not not registered: %s' % ipaddr)
             state = 'up/invalid'
         else:
-            state = 'up' if up else 'down'
+            state = up and 'up' or 'down'
 
         if entry:
             entry['state'] = state
