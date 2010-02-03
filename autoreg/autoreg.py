@@ -15,10 +15,11 @@ import iptools
 csv_fields = [ 'hostname', 'ipaddr', 'macaddr', 'owner' ]
 
 class AutoregError (Exception):
-    def __init__ (self, msg=None, request=None, response=None):
+    def __init__ (self, msg=None, request=None, response=None, doc=None):
         super(AutoregError, self).__init__(msg)
-        self.request = request
-        self.response = response
+        self.request    = request
+        self.response   = response
+        self.doc        = doc
 
 class HTTPError(AutoregError):
     pass
@@ -35,11 +36,21 @@ def cmp_ip (a, b):
 
     return cmp(a,b)
 
+def authenticated(func):
+    def _ (self, *args, **kwargs):
+        if not self.authenticated:
+            raise LoginRequired()
+
+        return func(self, *args, **kwargs)
+
+    return _
+
 class Autoreg (object):
     base_url    = 'https://autoreg.fas.harvard.edu'
 
     login_url   = '%s/home/index.html'          % base_url
     scope_url   = '%s/tools/scopes.html'        % base_url
+    bulk_url   = '%s/admin/bulk.html'           % base_url
     client_url  = '%s/tools/client/client.html' % base_url
 
     def __init__ (self, config):
@@ -65,13 +76,13 @@ class Autoreg (object):
         error = doc.find('//p[@class="error"]')
         if error is not None:
             raise LoginError('Login failed: %s' % error.text,
-                    request=req, response=response)
+                    req, response, doc)
 
         self.authenticated = True
 
+    @authenticated
     def scope(self, scope):
-        if not self.authenticated:
-            raise LoginRequired()
+        '''Return all registrations in a given scope.'''
 
         params = {
                 'scope': scope,
@@ -80,9 +91,28 @@ class Autoreg (object):
         req = urllib2.Request(self.scope_url, data)
         response = self.opener.open(req)
 
-        return self.parse_scopes(response)
+        return self._parse_scopes(response)
 
-    def parse_scopes (self, response):
+    @authenticated
+    def unregister(self, *args):
+        '''Unregister one or more clients, identified by MAC address.'''
+
+        params = {
+                'clients': '\n'.join([x.strip() for x in args]),
+                'action': 'unregisterClients',
+                'type': 'unregister',
+                }
+
+        data = urllib.urlencode(params)
+        req = urllib2.Request(self.bulk_url, data)
+        response = self.opener.open(req)
+
+        doc = ET.parse(response, ET.HTMLParser())
+        error = doc.find('//p[@class="error"]')
+        if error is not None:
+            raise AutoregError(error.text, req, response, doc)
+
+    def _parse_scopes (self, response):
         doc = ET.parse(response, ET.HTMLParser())
         rows = doc.xpath('/html/body//table/tr[th = "Host Name"]/..//tr')
 
