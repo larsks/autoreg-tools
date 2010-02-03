@@ -9,6 +9,7 @@ setup(name='autoreg-tools',
         install_requires=[
             'lxml',
             'configdict',
+            'iptools',
             ],
         description='Tools for interacting with FAS Autoreg network registration system.',
         long_description=read('README.rst'),
