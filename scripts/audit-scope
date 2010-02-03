@@ -91,7 +91,7 @@ def main():
 
     writer = csv.DictWriter(sys.stdout, 
             ['hostname', 'ipaddr', 'macaddr', 'owner', 'state'])
-    writer.writerows(scope)
+    writer.writerows(sorted(scope, cmp=autoreg.cmp_ip))
 
 if __name__ == '__main__':
     main()

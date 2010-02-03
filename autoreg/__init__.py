@@ -1,3 +1,1 @@
-import autoreg
-Autoreg = autoreg.Autoreg
-
+from autoreg import *

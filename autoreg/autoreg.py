@@ -10,6 +10,7 @@ import urllib2
 import lxml.etree as ET
 
 import configdict
+import iptools
 
 csv_fields = [ 'hostname', 'ipaddr', 'macaddr', 'owner' ]
 
@@ -27,6 +28,12 @@ class LoginError(AutoregError):
 
 class LoginRequired(AutoregError):
     pass
+
+def cmp_ip (a, b):
+    a = iptools.ip2long(a['ipaddr'])
+    b = iptools.ip2long(b['ipaddr'])
+
+    return cmp(a,b)
 
 class Autoreg (object):
     base_url    = 'https://autoreg.fas.harvard.edu'
