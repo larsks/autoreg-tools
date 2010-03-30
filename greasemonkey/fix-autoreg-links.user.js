@@ -5,6 +5,7 @@
 // ==/UserScript==
 
 CLIENT_URL = 'https://autoreg.fas.harvard.edu/tools/client/client.html?macAddress='
+RE_MACADDR = /([0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f])/i;
 
 // These are just examples of the data we're dealing with.
 // <a href="javascript:_client('00:50:56:88:25:10')">00:50:56:88:25:10</a>
@@ -24,23 +25,22 @@ function replace_javascript_links() {
 			macaddr = cand.href.substr(20, 17)
 		}
 
-		if (macaddr)
+		if (macaddr && macaddr.match(RE_MACADDR))
 			cand.href = CLIENT_URL + macaddr
 	}
 }
-
 
 // Replace bare MAC addresses in table cells with appropriate
 // client links.
 function replace_mac_addrs () {
 	var candidates = document.getElementsByTagName("td");
-	macaddrRegex = /([0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f])/i;
+
 	for (var cand = null, i = 0; (cand = candidates[i]); i++) {
 		if (! cand.getAttribute('class') == 'cell')
 			continue;
 
 		text = cand.firstChild.textContent;
-		var match = cand.firstChild.textContent.match(macaddrRegex);
+		var match = cand.firstChild.textContent.match(RE_MACADDR);
 		if (! match)
 			continue;
 
